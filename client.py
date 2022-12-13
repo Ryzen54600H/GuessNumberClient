@@ -46,6 +46,7 @@ class Client2:
 
             # define user identity
             self.defineUser = 19020046
+            self.playerOrder = -1
 
             self.ListQuestionNumber = []
             self.curGuessingNumberMap = None
@@ -118,20 +119,7 @@ class Client2:
             self.questionNumber = 0
 
       
-      def destroy_frame(self, frame_name):
-            if (frame_name == self.login_frame_name):
-                  self.login_frame.destroy()
-            elif (frame_name == self.playing_frame_name):
-                  self.playing_frame.destroy()
-            elif (frame_name == self.select_task_frame_name):
-                  self.taskListDisplaying.destroy()
-                  self.select_task_frame.destroy()
-            elif (frame_name == self.answer_frame_name):
-                  self.question.destroy()
-                  self.question_canvas.destroy()
-                  self.answer_input.destroy()
-                  self.submit_frame.destroy()
-                  self.answer_frame.destroy()
+      
 
                   
 
@@ -159,7 +147,6 @@ class Client2:
                               ans = ans + 1
                               print("i j:", i, j)
                               self.DFS(i, j)
-
             return ans
 
       def DFS(self, i, j):
@@ -226,6 +213,14 @@ class Client2:
                   if(type == self.PKT_ACCEPT_CONNECT): #status of people joining
                         print(data)
                         self.defineUser = int.from_bytes(data[0 : 4], byteorder = 'little')
+                        acceptStatus = int.from_bytes(data[4 : 8], byteorder = 'little')
+                        if (acceptStatus == 1) :
+                              self.playerOrder = int.from_bytes(data[8 : 12], byteorder = 'little')
+                              print("Player assigned to order ", self.playerOrder)
+                              self.change_frame(self.login_frame_name, self.playing_frame_name)
+                        else:
+                              print("Failed to enter game")
+                              
 
                   # send verify package
                   if(type == self.PKT_START):
@@ -395,18 +390,19 @@ class Client2:
                         questNumber = int.from_bytes(data[4 : 8], byteorder = 'little')
                         code = int.from_bytes(data[8 : 12], byteorder = 'little')
                         winner = int.from_bytes(data[12 : 16], byteorder = 'little')
-                        yourPoint = int.from_bytes(data[16 : 20], byteorder = 'little')
-                        yourResult = int.from_bytes(data[20 : 24], byteorder = 'little')
-                        yourRevealed = int.from_bytes(data[24 : 28], byteorder = 'little')
-                        opponentPoint = int.from_bytes(data[28 : 32], byteorder = 'little')
-                        opponentResult = int.from_bytes(data[32 : 36], byteorder = 'little')
-                        opponentRevealed = int.from_bytes(data[36 : 40], byteorder = 'little')
+                        player1Point = int.from_bytes(data[16 : 20], byteorder = 'little')
+                        player1Result = int.from_bytes(data[20 : 24], byteorder = 'little')
+                        player1Revealed = int.from_bytes(data[24 : 28], byteorder = 'little')
+                        player2Point = int.from_bytes(data[28 : 32], byteorder = 'little')
+                        player2Result = int.from_bytes(data[32 : 36], byteorder = 'little')
+                        player2Revealed = int.from_bytes(data[36 : 40], byteorder = 'little')
                         errorLen = int.from_bytes(data[40 : 44], byteorder = 'little')
                         error = data[44: 44 + errorLen]
                         print("Round result:")
                         print(code, " - ", winner)
-                        print(yourPoint, " - ", yourResult, " - ", yourRevealed)
-                        print(opponentPoint, " - ", opponentResult, " - ", opponentRevealed)
+                        print(player1Point, " - ", player1Result, " - ", player1Revealed)
+                        print(player2Point, " - ", player2Result, " - ", player2Revealed)
+                        self.display_score(player1Point, player2Point)
 
 
                   # #end game
@@ -429,7 +425,6 @@ class Client2:
             self.main_windows.title("Guess Number")
             ttk.Label(self.main_windows, text = "Guess Number", font = ("Arial", 20)).pack()
             self.create_login_frame()
-            
             self.main_windows.mainloop()
 
             
@@ -475,11 +470,6 @@ class Client2:
 
       def onclick_login(self, ip_address, port_number, user_id, password):
             print("login ", ip_address , " ", port_number, " ", user_id)
-            if (True):
-                  self.change_frame(self.login_frame_name, self.playing_frame_name)
-            else:
-                  print("Failed to connect")
-            # if connect successfully, destroy login frame and create playing frame
             self.create_connect(ip_address, port_number)
             self.send_hello(user_id, password)
             self.start_data_thread()
@@ -533,21 +523,24 @@ class Client2:
                         self.taskList.append(task)
                         self.display_select_task(400, 400, [2, 2], 'Task ', task.imageSize, task.mappingArr.reshape(-1), 400, 30, task.defineNumber)
             
-            frame = tk.Frame(self.select_task_frame, height = 200, width = 600)
-            frame.pack(expand = False)
-            ttk.Label(frame, text="Task selected:").grid(column=0, row=0, padx=5, pady=5)
-            self.taskSelectInput = tk.Text(frame, height = 1, width = 10)
+            input_frame = tk.Frame(self.select_task_frame, height = 200, width = 600)
+            input_frame.pack()
+            ttk.Label(input_frame, text="Task selected:").grid(column=0, row=0, padx=5, pady=5)
+            self.taskSelectInput = tk.Text(input_frame, height = 1, width = 10)
             self.taskSelectInput.grid(column = 1, row = 0)
-            ttk.Label(frame, text="Mask X:").grid(column=2, row=0, padx=5, pady=5)
-            self.maskXInput = tk.Text(frame, height = 1, width = 10)
+            ttk.Label(input_frame, text="Mask X:").grid(column=2, row=0, padx=5, pady=5)
+            self.maskXInput = tk.Text(input_frame, height = 1, width = 10)
             self.maskXInput.grid(column = 3, row = 0)
-            ttk.Label(frame, text="Mask Y:").grid(column=4, row=0,padx=5, pady=5)
-            self.maskYInput = tk.Text(frame, height = 1, width = 10)
+            ttk.Label(input_frame, text="Mask Y:").grid(column=4, row=0,padx=5, pady=5)
+            self.maskYInput = tk.Text(input_frame, height = 1, width = 10)
             self.maskYInput.grid(column = 5, row = 0)
-            AIButton = tk.Button(self.select_task_frame, text = 'AI choose', command = lambda: [self.AI_choose_the_task()])
-            AIButton.pack()
-            submitButton = tk.Button(self.select_task_frame, text = 'Submit', command = lambda: [self.send_task_selected(), self.change_frame(self.select_task_frame_name, self.answer_frame_name)])
-            submitButton.pack()
+
+            button_frame = tk.Frame(self.select_task_frame, height = 200, width = 600)
+            button_frame.pack()
+            AIButton = tk.Button(button_frame, text = 'AI choose', command = lambda: [self.AI_choose_the_task()])
+            AIButton.grid(column= 2, row = 1)
+            submitButton = tk.Button(button_frame, text = 'Submit', command = lambda: [self.send_task_selected(), self.change_frame(self.select_task_frame_name, self.answer_frame_name)])
+            submitButton.grid(column= 3, row= 1)
       
       def AI_choose_the_task(self):
             self.taskSelectInput.delete('1.0', 'end')
@@ -656,7 +649,20 @@ class Client2:
             self.destroy_frame(close_frame_name)
             self.create_frame(open_frame_name)
 
-      
+      def destroy_frame(self, frame_name):
+            if (frame_name == self.login_frame_name):
+                  self.login_frame.destroy()
+            elif (frame_name == self.playing_frame_name):
+                  self.playing_frame.destroy()
+            elif (frame_name == self.select_task_frame_name):
+                  self.taskListDisplaying.destroy()
+                  self.select_task_frame.destroy()
+            elif (frame_name == self.answer_frame_name):
+                  self.question.destroy()
+                  self.question_canvas.destroy()
+                  self.answer_input.destroy()
+                  self.submit_frame.destroy()
+                  self.answer_frame.destroy()
 
 if __name__ == "__main__":
       client = Client2()
