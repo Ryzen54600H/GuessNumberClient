@@ -365,6 +365,8 @@ class Client2:
                                     print(self.curGuessingNumberMap[i][j], end = "")
                               print("")
 
+                        print("After suggested:")
+                        print(self.curGuessingNumberMap)
                         self.display_question(40, self.curGuessingNumberMap)
                               
                         # guessednumber = self.AIGuessing.run(self.curGuessingNumberMap)
@@ -601,7 +603,7 @@ class Client2:
                   for col in range(imageSize):
                         imageStartPos = (col * int(400 / imageSize) + 2, row * int(400 / imageSize) + 2)
                         imageEndPos = ((col + 1) * int(400 / imageSize) + 2, (row + 1) * int(400 / imageSize) + 2)
-                        self.question_canvas.create_rectangle(imageStartPos, imageEndPos, fill = self.color[image[row * imageSize + col]])
+                        self.question_canvas.create_rectangle(imageStartPos, imageEndPos, fill = self.color[int(image[row * imageSize + col])])
             self.display_answer_submition()
 
       def display_answer_submition(self):
