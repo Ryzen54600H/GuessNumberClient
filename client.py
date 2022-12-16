@@ -114,14 +114,9 @@ class Client2:
             #Threading
             self.data_thread = None
 
-            self.AIGuessing = NumberGuesser("checkpoints/mnist-12.onnx")
+            self.AIGuessing = NumberGuesser()
 
             self.questionNumber = 0
-
-      
-      
-
-                  
 
 
       def GetLocationGuessNumber(self, x):
@@ -369,10 +364,11 @@ class Client2:
                               for j in range(self.curTaskImageSize):
                                     print(self.curGuessingNumberMap[i][j], end = "")
                               print("")
-                        guessednumber = self.AIGuessing.run(self.curGuessingNumberMap)
-                        print("guessednumber: ", guessednumber)
-                        Answer_submit_package = self.Encode(self.PKT_ANSWER_SUBMIT, 12, self.defineUser, questNumber, int(guessednumber))
-                        self.client.send(Answer_submit_package)
+                              
+                        # guessednumber = self.AIGuessing.run(self.curGuessingNumberMap)
+                        # print("guessednumber: ", guessednumber)
+                        # Answer_submit_package = self.Encode(self.PKT_ANSWER_SUBMIT, 12, self.defineUser, questNumber, int(guessednumber))
+                        # self.client.send(Answer_submit_package)
 
                   #confirm the answers from server
                   if(type == self.PKT_ANSWER_CHECKED):
@@ -383,6 +379,7 @@ class Client2:
                         serverAnswer = int.from_bytes(data[16 : 20], byteorder = 'little')
                         numBlockOpened = int.from_bytes(data[20 : 24], byteorder = 'little')
                         print("Result: ", result)
+                        print(str(data))
                         print(clientAnswer, " - ", serverAnswer, " - ", numBlockOpened)
                   #server sent result
                   if(type == self.PKT_ROUND_RESULTS):
@@ -402,7 +399,14 @@ class Client2:
                         print(code, " - ", winner)
                         print(player1Point, " - ", player1Result, " - ", player1Revealed)
                         print(player2Point, " - ", player2Result, " - ", player2Revealed)
-                        self.display_score(player1Point, player2Point)
+                        
+                        self.change_frame(self.playing_frame_name, self.playing_frame_name)
+                        if (self.playerOrder == 1):
+                              self.display_score(player1Point, player2Point)
+                        else:
+                              self.display_score(player2Point, player1Point)
+                        
+                        
 
 
                   # #end game
@@ -617,9 +621,6 @@ class Client2:
             submitLaterBtn['command'] = lambda: [print('Answer later'), self.answer_later()]
             submitLaterBtn.grid(column= 3, row = 1, padx = 5, pady = 5)
 
-      def answer_suggest_questions(self):
-            # answer and send package here
-            print("Answer the suggest questions")
 
       def ai_guess_the_number(self):
             # ai guess here
@@ -628,8 +629,6 @@ class Client2:
             print("guessednumber: ", guessednumber)
             if (int(guessednumber) < 10):
                   self.answer_input.insert('1.0', str(guessednumber))
-            else:
-                  self.answer_suggest_questions()
       
       def answer_submit(self):
             # submit the answer here
@@ -637,11 +636,12 @@ class Client2:
             Answer_submit_package = self.Encode(self.PKT_ANSWER_SUBMIT, 12, self.defineUser, self.questNumber, int(self.answer_input.get('1.0', 'end')))
             print(Answer_submit_package)
             self.client.send(Answer_submit_package)
-            self.change_frame(self.playing_frame_name, self.playing_frame_name)
       
       def answer_later(self):
             # tell server about the delay of the answer here
             print("Server, I will give you my answer later")
+            answer_later_package = self.Encode(self.PKT_ANSWER_SUBMIT, 12, self.defineUser, self.questNumber, 100)
+            self.client.send(answer_later_package)
 
 
 
