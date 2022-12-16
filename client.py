@@ -364,6 +364,8 @@ class Client2:
                               for j in range(self.curTaskImageSize):
                                     print(self.curGuessingNumberMap[i][j], end = "")
                               print("")
+
+                        self.display_question(40, self.curGuessingNumberMap)
                               
                         # guessednumber = self.AIGuessing.run(self.curGuessingNumberMap)
                         # print("guessednumber: ", guessednumber)
@@ -400,7 +402,7 @@ class Client2:
                         print(player1Point, " - ", player1Result, " - ", player1Revealed)
                         print(player2Point, " - ", player2Result, " - ", player2Revealed)
 
-                        self.change_frame(self.answer_frame, self.select_task_frame)
+                        self.change_frame(self.answer_frame_name, self.select_task_frame_name)
                         if (self.playerOrder == 1):
                               self.display_score(player1Point, player2Point)
                         else:
@@ -516,8 +518,7 @@ class Client2:
 
 
       def display_task_list_frame(self, taskList):
-            if (not self.select_task_frame):
-                  self.create_select_tasks_frame()
+            self.create_select_tasks_frame()
             
             ttk.Label(self.select_task_frame, text = "Select Task", font = ("Arial", 16)).pack()
             self.taskListDisplaying = ttk.Notebook(self.select_task_frame) 
@@ -588,9 +589,7 @@ class Client2:
 
 
       def display_question(self, imageSize, image):
-            if (not self.answer_frame) :
-                  print("Create answer frame")
-                  self.create_answer_frame()
+            self.create_answer_frame()
             
             ttk.Label(self.answer_frame, text = "Answer the question", font = ("Arial", 16)).pack()
             
@@ -655,13 +654,8 @@ class Client2:
             elif (frame_name == self.playing_frame_name):
                   self.playing_frame.destroy()
             elif (frame_name == self.select_task_frame_name):
-                  self.taskListDisplaying.destroy()
                   self.select_task_frame.destroy()
             elif (frame_name == self.answer_frame_name):
-                  self.question.destroy()
-                  self.question_canvas.destroy()
-                  self.answer_input.destroy()
-                  self.submit_frame.destroy()
                   self.answer_frame.destroy()
 
 if __name__ == "__main__":
