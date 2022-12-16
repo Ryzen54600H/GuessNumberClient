@@ -399,8 +399,8 @@ class Client2:
                         print(code, " - ", winner)
                         print(player1Point, " - ", player1Result, " - ", player1Revealed)
                         print(player2Point, " - ", player2Result, " - ", player2Revealed)
-                        
-                        self.change_frame(self.playing_frame_name, self.playing_frame_name)
+
+                        self.change_frame(self.answer_frame, self.answer_frame)
                         if (self.playerOrder == 1):
                               self.display_score(player1Point, player2Point)
                         else:
