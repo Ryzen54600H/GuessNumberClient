@@ -111,6 +111,10 @@ class Client2:
             self.end_game_main_text = None
             self.your_end_score = None
             self.opponent_end_score = None
+
+            self.winnerOrder = 0
+            self.player1_end_score = 0
+            self.player2_end_score = 0
             
             self.color = ['white', 'gray', 'black']
             self.taskList = []
@@ -213,6 +217,10 @@ class Client2:
             self.end_game_main_text = None
             self.your_end_score = None
             self.opponent_end_score = None
+
+            self.winnerOrder = 0
+            self.player1_end_score = 0
+            self.player2_end_score = 0
             
             self.color = ['white', 'gray', 'black']
             self.taskList = []
@@ -223,6 +231,7 @@ class Client2:
             self.AIGuessing = NumberGuesser()
 
             self.questionNumber = 0
+
       
       def GetLocationGuessNumber(self, x):
             for i in range(10):
@@ -515,26 +524,15 @@ class Client2:
                         else:
                               self.display_score(player2Point, player1Point)
                         
-                        
-
-
-                  # #end game
+                  # end game
                   if(type == self.PKT_END_GAME):
                         #data[0 : 4] is defineUser
-                        matchWinner = int.from_bytes(data[4 : 8], byteorder = 'little')
-                        player1Point = int.from_bytes(data[8 : 12], byteorder = 'little')
-                        player2Point = int.from_bytes(data[12 : 16], byteorder = 'little')
+                        self.winnerOrder = int.from_bytes(data[4 : 8], byteorder = 'little')
+                        self.player1_end_score = int.from_bytes(data[8 : 12], byteorder = 'little')
+                        self.player2_end_score = int.from_bytes(data[12 : 16], byteorder = 'little')
+                        
                         self.change_frame(self.playing_frame_name, self.end_game_frame_name)
-                        if (matchWinner == self.playerOrder):
-                              self.end_game_main_text["text"] = "Winner Winner Chicken Dinner!"
-                        else:
-                              self.end_game_main_text["text"] = "You Lose..."
-                        if (self.playerOrder == 1):
-                              self.your_end_score["text"] = str(player1Point)
-                              self.opponent_end_score["text"] = str(player2Point)
-                        else:
-                              self.your_end_score["text"] = str(player2Point)
-                              self.opponent_end_score["text"] = str(player1Point)
+                        
                         
                   # get package from server
                   self.datarecv = self.client.recv(12400)
@@ -759,6 +757,16 @@ class Client2:
             ttk.Label(self.end_game_frame, text = "", font = ("Arial", 20)).grid(column=2, row=9)
             ttk.Button(self.end_game_frame, text="Back to main menu", command= lambda: [self.Reset(), self.change_frame(self.end_game_frame_name, self.login_frame_name)]).grid(column=2, row=10)
             
+            if (self.winnerOrder == self.playerOrder):
+                  self.end_game_main_text["text"] = "Winner Winner Chicken Dinner!"
+            else:
+                  self.end_game_main_text["text"] = "You Lose..."
+            if (self.playerOrder == 1):
+                  self.your_end_score["text"] = str(self.player1_end_score)
+                  self.opponent_end_score["text"] = str(self.player2_end_score)
+            else:
+                  self.your_end_score["text"] = str(self.player2_end_score)
+                  self.opponent_end_score["text"] = str(self.player1_end_score)
 
 
       def ai_guess_the_number(self):
