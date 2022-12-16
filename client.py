@@ -367,7 +367,7 @@ class Client2:
 
                         print("After suggested:")
                         print(self.curGuessingNumberMap)
-                        self.display_question(40, self.curGuessingNumberMap)
+                        self.display_question(40, self.curGuessingNumberMap.reshape(-1))
                               
                         # guessednumber = self.AIGuessing.run(self.curGuessingNumberMap)
                         # print("guessednumber: ", guessednumber)
