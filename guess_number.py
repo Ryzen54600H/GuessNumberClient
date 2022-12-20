@@ -45,24 +45,4 @@ class NumberGuesser():
             return idx
         return 100
 
-if __name__ == '__main__':
-    guess = NumberGuesser("checkpoints/mnist-12.onnx")
-    
-    path = "data/mnist_test.csv"
-
-    import pandas as pd
-    df = pd.read_csv(path)
-    
-    label = df.iloc[:, 0]
-    df_img = df.iloc[:, 1:]
-    
-    
-    idx = 5
-    image = df_img.iloc[idx].to_numpy()
-    image[image < 50] = 0
-    image[image >= 50] = 1
-        
-    print(guess.run(image))
-    print(label.iloc[idx])
-        
         
