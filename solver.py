@@ -5,15 +5,18 @@ class Location:
             self.row = row
             self.col = col
 
-
 class Solver():
 	def __init__(self):
 		self.VisitedLocation = None
 		self.curGuessingMap = None
+		self.curArraySize = None
+		self.dx = [0, 1, -1, 0]
+		self.dy = [1, 0, 0, -1]
 
 
-	def SolveSuggestQuestion(self, curListLocation):
+	def SolveSuggestQuestion(self, curListLocation, ArraySize):
 		ans = 0
+		self.curArraySize = ArraySize
 		self.VisitedLocation = np.zeros((self.curArraySize, self.curArraySize),dtype = np.int32)
 		self.curGuessingMap = np.zeros((self.curArraySize, self.curArraySize),dtype = np.int32)
 		for item in curListLocation:

@@ -8,7 +8,7 @@ from tkinter import ttk
 import threading
 from guess_number import NumberGuesser
 from solver import Solver
-
+ 
 # define a number with mapping array
 class QuestionNumber:
       defineNumber = 0 # the number
@@ -62,7 +62,6 @@ class Client2:
             self.VisitedLocation = None
             self.curGuessingMap = None
             self.curListLocation = None
-            self.curArraySize = None
             self.curNumberBlock = None
             self.dx = [0, 1, -1, 0]
             self.dy = [1, 0, 0, -1]
@@ -124,6 +123,107 @@ class Client2:
 
             self.questionNumber = 0
 
+
+      def Reset(self):
+            # create connect
+            self.host = None
+            self.port = 0
+
+            # define package type name
+            self.PKT_HELLO = 0
+            self.PKT_ACCEPT_CONNECT = 1
+            self.PKT_START = 2
+            self.PKT_SELECT_TASK = 3
+            self.PKT_TASK_SELECTED = 4
+            self.PKT_TASK_REQUEST = 5
+            self.PKT_SUGGEST_QUESTIONS = 6
+            self.PKT_SUGGEST_ANSWERS = 7
+            self.PKT_SUGGEST_RESULTS = 8
+            self.PKT_ANSWER_SUBMIT = 9
+            self.PKT_ANSWER_CHECKED = 10
+            self.PKT_ROUND_RESULTS = 11
+            self.PKT_END_GAME = 12
+
+            self.datarecv = None
+
+            # define user identity
+            self.defineUser = 19020046
+            self.playerOrder = -1
+
+            self.ListQuestionNumber = []
+            self.curGuessingNumberMap = None
+            self.curGuessingNumberSmallMap = None #10x10 
+            self.numBlockleft = None
+            self.curSuggestQuestion = 0
+            self.CurGuessingLocation = None
+            self.curTaskImageSize = None
+            self.AnsweredGuessQuestion = 0
+            self.curTotalAnsweredGuess = 0
+
+            # for finding connected
+            self.VisitedLocation = None
+            self.curGuessingMap = None
+            self.curListLocation = None
+            self.curNumberBlock = None
+            self.dx = [0, 1, -1, 0]
+            self.dy = [1, 0, 0, -1]
+
+            self.HashingMapForSmallMap = [[1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+                                    [36, 37, 38, 39, 40, 41, 42, 43, 44, 11],
+                                    [35, 64, 65, 66, 67, 68, 69, 70, 45, 12],
+                                    [34, 63, 84, 85, 86, 87, 88, 71, 46, 13],
+                                    [33, 62, 83, 96, 97, 98, 89, 72, 47, 14],
+                                    [32, 61, 82, 95, 100, 99, 90, 73, 48, 15],
+                                    [31, 60, 81, 94, 93, 92, 91, 74, 49, 16],
+                                    [30, 59, 80, 79, 78, 77, 76, 75, 50, 17],
+                                    [29, 58, 57, 56, 55, 54, 53, 52, 51, 18],
+                                    [28, 27, 26, 25, 24, 23, 22, 21, 20, 19]]
+
+
+            # UI
+            self.main_windows = None
+            self.login_frame_name = 'Login'
+            self.login_frame = None
+
+            self.playing_frame_name = 'Playing'
+            self.playing_frame = None
+            
+            self.score_frame_name = 'Score'
+            self.scoreFrame = None
+            self.yourScoreDisplaying = None
+            self.opponentScoreDisplaying = None
+            
+            self.select_task_frame_name = 'Select Task'
+            self.select_task_frame = None
+            self.task_list_frame_name = 'Task List'
+            self.taskListDisplaying = None
+            self.taskSelectInput = None
+            self.maskXInput = None
+            self.maskYInput = None
+            
+            self.answer_frame_name = 'Answer'
+            self.answer_frame = None
+            self.question = None
+            self.question_canvas = None
+            self.submit_frame = None
+            self.answer_input = None
+
+            self.end_game_frame_name = "End Game"
+            self.end_game_frame = None
+            self.end_game_main_text = None
+            self.your_end_score = None
+            self.opponent_end_score = None
+            
+            self.color = ['white', 'gray', 'black']
+            self.taskList = []
+
+            #Threading
+            self.data_thread = None
+
+            self.AIGuessing = NumberGuesser()
+
+            self.questionNumber = 0
+      
       def GetLocationGuessNumber(self, x):
             for i in range(10):
                   for j in range(10):
@@ -316,7 +416,6 @@ class Client2:
                         AnswerArray = []
                         for i in range(numberQuestions):
                               ArraySize = int.from_bytes(data[oldIndex + 0 : oldIndex + 4], byteorder = 'little')
-                              self.curArraySize = ArraySize
                               print("ArraySize: ", ArraySize)
 
                               numberBlock = int.from_bytes(data[oldIndex + 4 : oldIndex + 8], byteorder = 'little')
@@ -333,7 +432,7 @@ class Client2:
                                     LocationNum = Location(Numberrow, Numbercol)
                                     ListLocation.append(LocationNum)
                               self.curListLocation = ListLocation
-                              AnswerArray.append(self.SuggestGuessing.SolveSuggestQuestion(self.curListLocation))
+                              AnswerArray.append(self.SuggestGuessing.SolveSuggestQuestion(self.curListLocation, ArraySize))
                         Suggest_answers_package = self.Encode(self.PKT_SUGGEST_ANSWERS, 16 + numberQuestions * 4, self.defineUser, questNumber, index, numberQuestions, AnswerArray)
                         self.client.send(Suggest_answers_package)
                   #receive results
@@ -657,7 +756,9 @@ class Client2:
             ttk.Label(self.end_game_frame, text = "Opponent Score:", font = ("Arial", 16)).grid(column= 1, row=7)
             self.opponent_end_score = ttk.Label(self.end_game_frame, text = "", font = ("Arial", 16))
             self.opponent_end_score.grid(column=3, row=7)
-
+            ttk.Label(self.end_game_frame, text = "", font = ("Arial", 20)).grid(column=2, row=8)
+            ttk.Label(self.end_game_frame, text = "", font = ("Arial", 20)).grid(column=2, row=9)
+            ttk.Button(self.end_game_frame, text="Back to main menu", command= lambda: [self.change_frame(self.end_game_frame_name, self.login_frame_name), self.Reset()]).grid(column=2, row=10)
             
 
 
@@ -697,6 +798,8 @@ class Client2:
                   self.select_task_frame.destroy()
             elif (frame_name == self.answer_frame_name):
                   self.answer_frame.destroy()
+            elif (frame_name == self.end_game_frame_name):
+                  self.end_game_frame.destroy()
 
 if __name__ == "__main__":
       client = Client2()
