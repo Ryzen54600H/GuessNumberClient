@@ -320,7 +320,6 @@ class Client2:
                               self.change_frame(self.login_frame_name, self.playing_frame_name)
                         else:
                               print("Failed to enter game")
-                              self.client.close()
                               
 
                   # send verify package
@@ -537,7 +536,7 @@ class Client2:
                               self.opponent_end_score["text"] = str(player1Point)
                         
                   # get package from server
-                  if self.client.fileno != -1:
+                  if (self.client.fileno != -1):
                         self.datarecv = self.client.recv(12400)
                   else:
                         break
