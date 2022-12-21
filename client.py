@@ -295,7 +295,7 @@ class Client2:
 
       def send_hello(self, user_id, password):
             # send Hello
-            Hello_package = self.Encode(self.PKT_HELLO, 8, user_id, password)
+            Hello_package = self.Encode(self.PKT_HELLO, 8, int(user_id), int(password))
             print(Hello_package)
             self.client.send(Hello_package)
             print("hello package send successfully")
