@@ -761,7 +761,7 @@ class Client2:
             self.opponent_end_score.grid(column=3, row=7)
             ttk.Label(self.end_game_frame, text = "", font = ("Arial", 20)).grid(column=2, row=8)
             ttk.Label(self.end_game_frame, text = "", font = ("Arial", 20)).grid(column=2, row=9)
-            ttk.Button(self.end_game_frame, text="Back to main menu", command= lambda: [self.change_frame(self.end_game_frame_name, self.login_frame_name), self.Reset()]).grid(column=2, row=10)
+            
             
 
 
